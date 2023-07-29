@@ -6,6 +6,7 @@
     font-style: normal;
     font-size: 1.5rem;
     color: #f2f4f3;
+    border-radius: 0;
 }
 
 body{
@@ -49,6 +50,10 @@ h1{
     border-bottom: #f2f4f3 solid;
     outline: none;
     text-align: right;
+    touch-action: manipulation; /* CSS pour iOS Safari */
+    -ms-touch-action: manipulation; /* CSS pour IE10 et IE11 */
+    user-drag: none; /* CSS pour Safari */
+    user-select: none; /* CSS pour Chrome et Firefox */
 }
 
 /* Styles de base pour le bouton de type activé/désactivé */
