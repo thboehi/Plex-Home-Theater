@@ -11,12 +11,11 @@ const port = 3000;
 
 const baseHueURL = credentials.baseUrl; // Change this in the credentials.js file
 const username = credentials.username; // Change by your token for the Hue Bridge (search google how to create a new token, you can use Insomnia, Postman, etc.)
-const lightNumber = 4; // The number of the light you wish to control
 
 const upload = multer();
 
 //Vars for configs
-let playerName, userOneName, userTwoName, homeTheaterMode;
+let playerName, userOneName, userTwoName, homeTheaterMode, lightNumber;
 
 // Charger les valeurs depuis le fichier JSON au démarrage de l'application
 const configPath = './config.json';
@@ -32,6 +31,7 @@ function loadConfig() {
     userOneName = loadedConfig.userOneName;
     userTwoName = loadedConfig.userTwoName;
     homeTheaterMode = loadedConfig.homeTheaterMode;
+    lightNumber = loadedConfig.lightNumber;
     debugMode = loadedConfig.debugMode;
     logMessage('Configuration loaded from config.json.', true);
   } catch (error) {
@@ -93,7 +93,7 @@ app.use(express.static('public'));
 
 // Route to get current setup
 app.get('/get-light-control-status', (req, res) => {
-  res.json({ homeTheaterMode: homeTheaterMode, playerName: playerName, userName1: userOneName, userName2: userTwoName, debugMode: debugMode });
+  res.json({ homeTheaterMode: homeTheaterMode, playerName: playerName, userName1: userOneName, userName2: userTwoName, debugMode: debugMode, lightNumber: lightNumber });
 });
 
 app.post('/toggle-light-control', express.json(), (req, res) => {
@@ -116,12 +116,14 @@ app.post('/update-data', express.json(), (req, res) => {
   playerName = updatedData.playerName
   userOneName = updatedData.userOneName
   userTwoName = updatedData.userTwoName
+  lightNumber = updatedData.lightNumber
   const message = "Informations changée vers: " . updatedData
 
     // Save the config to the config file
     config.playerName = updatedData.playerName;
     config.userOneName = updatedData.userOneName;
     config.userTwoName = updatedData.userTwoName;
+    config.lightNumber = updatedData.lightNumber;
     fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf8');
 
 
