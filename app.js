@@ -4,6 +4,7 @@ const express = require('express');
 const axios = require('axios');
 const multer = require('multer');
 const credentials = require('./credentials'); 
+const fs = require('fs');
 
 const app = express();
 const port = 3000;
@@ -14,11 +15,33 @@ const lightNumber = 4; // The number of the light you wish to control
 
 const upload = multer();
 
-// Variable to check that your player is the right one
-let homeTheaterMode = true; // By default, Home Theater is activated.
-let playerName = "LG OLED55A19LA";  // Change this to the name of your TV, you can change that later, after testing. THe name of your TV will be shown in the console.
-let userOneName = "thboehi"; // Like before
-let userTwoName = "oliveira.18"; // Like before
+//Vars for configs
+let playerName, userOneName, userTwoName, homeTheaterMode;
+
+// Charger les valeurs depuis le fichier JSON au démarrage de l'application
+const configPath = './config.json';
+let config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+
+// Fonction pour charger les données depuis le fichier JSON
+function loadConfig() {
+  try {
+    const configFileContent = fs.readFileSync(configPath, 'utf8');
+    const loadedConfig = JSON.parse(configFileContent);
+    config = loadedConfig;
+    playerName = loadedConfig.playerName;
+    userOneName = loadedConfig.userOneName;
+    userTwoName = loadedConfig.userTwoName;
+    homeTheaterMode = loadedConfig.homeTheaterMode;
+    debugMode = loadedConfig.debugMode;
+    logMessage('Configuration loaded from config.json.', true);
+  } catch (error) {
+    logMessage('Error loading configuration from config.json:', true);
+    logMessage(error.message, true);
+  }
+}
+
+// Charger les données au démarrage de l'application
+loadConfig();
 
 app.post('/webhook', upload.any(), (req, res) => {
     const reqBody = JSON.parse(req.body.payload);
@@ -84,6 +107,7 @@ app.post('/toggle-debug', express.json(), (req, res) => {
   const { isEnabled } = req.body;
   debugMode = isEnabled;
   const message = isEnabled ? '✅ Debug mode activated.' : '❌ Debug mode deactivated.';
+  console.log(`${isEnabled ? '✅ Debug mode activated.' : '❌ Debug mode deactivated.'}`)
   res.json({ message });
 });
 
@@ -93,6 +117,14 @@ app.post('/update-data', express.json(), (req, res) => {
   userOneName = updatedData.userOneName
   userTwoName = updatedData.userTwoName
   const message = "Informations changée vers: " . updatedData
+
+    // Save the config to the config file
+    config.playerName = updatedData.playerName;
+    config.userOneName = updatedData.userOneName;
+    config.userTwoName = updatedData.userTwoName;
+    fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf8');
+
+
   res.json({ message });
 });
 
