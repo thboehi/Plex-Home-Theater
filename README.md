@@ -15,6 +15,6 @@ You can install the project using git clone and the follow these steps
 - Go to credentials_example.js and edit it with your Bridge Ip and token/username
 - Run `npm install` on the root to download node modules
 - Run `node app.js` to start the server or `pm2 start app.js` if you use PM2 (recommended)
-- Go to app.plex.tv and add a webhook to your machine, for example (if on the same machine) `http://localhost:3000/webhook`
+- Go to [app.plex.tv/webhook](https://app.plex.tv/desktop/#!/settings/webhooks) and add a webhook to your machine, for example (if on the same machine) `http://localhost:3000/webhook`
 
-You can go to [locahost:3000](http://localhost:3000) to edit the configs or directly from config.json (needs a restart if changed from file)
+You can go to [locahost:3000](http://localhost:3000) with your web browser to edit the configs or directly from config.json (needs a restart if changed from file)
