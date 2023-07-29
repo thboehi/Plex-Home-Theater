@@ -1,3 +1,5 @@
+let debugMode = false;
+
 const express = require('express');
 const axios = require('axios');
 const multer = require('multer');
@@ -13,7 +15,7 @@ const lightNumber = 4; // The number of the light you wish to control
 const upload = multer();
 
 // Variable to check that your player is the right one
-let lightControlEnabled = true; // By default, Home Theater is activated.
+let homeTheaterMode = true; // By default, Home Theater is activated.
 let playerName = "LG OLED55A19LA";  // Change this to the name of your TV, you can change that later, after testing. THe name of your TV will be shown in the console.
 let userOneName = "thboehi"; // Like before
 let userTwoName = "oliveira.18"; // Like before
@@ -21,43 +23,43 @@ let userTwoName = "oliveira.18"; // Like before
 app.post('/webhook', upload.any(), (req, res) => {
     const reqBody = JSON.parse(req.body.payload);
     const player = reqBody.Player.title;
-    console.log("------------------");
-    console.log('Player: ', player);
+    logMessage("------------------");
+    logMessage('Player: ' + player);
     const user = reqBody.Account.title;
-    console.log('User: ', user);
+    logMessage('User: ' + user);
     const event = reqBody.event;
-    console.log('Event: ', event);
-    console.log("------------------");
+    logMessage('Event: ' + event);
+    logMessage("------------------");
 
     if (player === playerName && (user === userOneName || user === userTwoName)){
-        console.log("Correct environment, continuing...");
-        console.log("------------------");
+        logMessage("Correct environment, continuing...");
+        logMessage("------------------");
         switch (event){
             case "media.play":
-                console.log("Movie started, shut down the light.");
+                logMessage("Movie started, shut down the light.");
                 controlHueLight(false);
-                console.log("------------------");
+                logMessage("------------------");
                 break;
             case "media.resume":
-                console.log("Movie resumed, shut down the light.");
+                logMessage("Movie resumed, shut down the light.");
                 controlHueLight(false);
-                console.log("------------------");
+                logMessage("------------------");
                 break;
             case "media.pause":
-                console.log("Movie paused, turn on the light.");
+                logMessage("Movie paused, turn on the light.");
                 controlHueLight(true);
-                console.log("------------------");
+                logMessage("------------------");
                 break;
             case "media.stop":
-                console.log("Movie stopped, turn on the light.");
+                logMessage("Movie stopped, turn on the light.");
                 controlHueLight(true);
-                console.log("------------------");
+                logMessage("------------------");
                 break;
         }
 
     } else {
-        console.log("Not the right environment, noting to do more.")
-        console.log("------------------");
+        logMessage("Not the right environment, noting to do more.")
+        logMessage("------------------");
     }
 
     res.sendStatus(200);
@@ -68,31 +70,55 @@ app.use(express.static('public'));
 
 // Route to get current setup
 app.get('/get-light-control-status', (req, res) => {
-  res.json({ isEnabled: lightControlEnabled});
+  res.json({ homeTheaterMode: homeTheaterMode, playerName: playerName, userName1: userOneName, userName2: userTwoName, debugMode: debugMode });
 });
 
 app.post('/toggle-light-control', express.json(), (req, res) => {
     const { isEnabled } = req.body;
-    lightControlEnabled = isEnabled;
+    homeTheaterMode = isEnabled;
     const message = isEnabled ? '✅ Home Theater Mode activated.' : '❌ Home Theater Mode deactivated.';
     res.json({ message });
 });
 
+app.post('/toggle-debug', express.json(), (req, res) => {
+  const { isEnabled } = req.body;
+  debugMode = isEnabled;
+  const message = isEnabled ? '✅ Debug mode activated.' : '❌ Debug mode deactivated.';
+  res.json({ message });
+});
+
+app.post('/update-data', express.json(), (req, res) => {
+  const updatedData = req.body;
+  playerName = updatedData.playerName
+  userOneName = updatedData.userOneName
+  userTwoName = updatedData.userTwoName
+  const message = "Informations changée vers: " . updatedData
+  res.json({ message });
+});
+
 async function controlHueLight(on) {
-  if (!lightControlEnabled) {
-    console.log('Theater Mode deactivated, nothing to do more.');
+  if (!homeTheaterMode) {
+    logMessage('Theater Mode deactivated, nothing to do more.');
     return;
 }
   try {
     const url = `${baseHueURL}/${username}/lights/${lightNumber}/state`;
     const body = { on: on };
     await axios.put(url, body);
-    console.log(`The light ${lightNumber} is now ${on ? 'ON' : 'OFF'}.`);
+    logMessage(`The light ${lightNumber} is now ${on ? 'ON' : 'OFF'}.`);
   } catch (error) {
     console.error('Error with Hue communication :', error.message);
   }
 }
 
+// Custom logging function
+function logMessage(message, important = false) {
+  if (debugMode || important) {
+    console.log(message);
+  }
+}
+
 app.listen(port, () => {
-  console.log(`Server is ready listening to port ${port}.`);
+  logMessage(`Server is ready listening to port ${port}.`, true);
 });
+
