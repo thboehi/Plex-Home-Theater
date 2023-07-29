@@ -2,20 +2,41 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Home Control</title>
+    <title>Control | Plex Home Theater</title>
     <link rel="stylesheet" href="stylesheets/global.css">
     <link rel="stylesheet" href="https://use.typekit.net/zye4cqi.css">
-    <meta content="#1d1d1d" data-react-helmet="true" name="theme-color">
+    <meta content="#000" data-react-helmet="true" name="theme-color">
+    <link rel="icon" type="image/x-icon" href="/favicon.svg">
+    <link rel="apple-touch-icon" sizes="500x500" href="icon.png">
 </head>
 <body>
+    <h1>Plex Home Theater</h1>
     <div class="main-container">
-        <h1>Home Control</h1>
         <div class="control-container">
             <div class="toggle">
                 <input type="checkbox" id="lightControlCheckbox" onchange="toggleLightControl()">
                 <label for="lightControlCheckbox"></label>
             </div>
-            <label for="lightControlCheckbox">Mode Home Theater</label>
+            <label for="lightControlCheckbox">Home Theater Mode</label>
+        </div>
+        <div class="control-container-text">
+            <label for="playerName">Player Name</label>
+            <input type="text" id="playerName" onblur="updateData()">
+        </div>
+        <div class="control-container-text">
+            <label for="userName1">First user</label>
+            <input type="text" id="userName1" onblur="updateData()">
+        </div>
+        <div class="control-container-text">
+            <label for="userName2" title="Put the same as the first if there is no second user.">Second user</label>
+            <input type="text" id="userName2" onblur="updateData()" title="Put the same as the first if there is no second user.">
+        </div>
+        <div class="control-container">
+            <div class="toggle">
+                <input type="checkbox" id="debugMode" onchange="toggleDebugMode()">
+                <label for="debugMode"></label>
+            </div>
+            <label for="debugMode">Debug</label>
         </div>
     </div>
     <script src="script.js"></script>

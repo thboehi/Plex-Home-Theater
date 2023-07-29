@@ -15,24 +15,65 @@ async function toggleLightControl() {
     }
 }
 
+async function toggleDebugMode() {
+    const isChecked = document.getElementById('debugMode').checked;
+    try {
+        const response = await fetch('/toggle-debug', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ isEnabled: isChecked })
+        });
+        const data = await response.json();
+        console.log(data.message);
+    } catch (error) {
+        console.error('Erreur lors de la communication avec le serveur :', error);
+    }
+}
+
+async function updateData() {
+    const playerName = document.getElementById('playerName').value;
+    const userName1 = document.getElementById('userName1').value;
+    const userName2 = document.getElementById('userName2').value;
+    try {
+        const response = await fetch('/update-data', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ playerName: playerName, userOneName: userName1, userTwoName: userName2 })
+        });
+        const data = await response.json();
+        console.log(data.message);
+    } catch (error) {
+        console.error('Erreur lors de la communication avec le serveur :', error);
+    }
+}
+
+
 // Fonction pour récupérer la valeur de lightControlEnabled depuis le serveur
 async function getLightControlStatus() {
     try {
       const response = await fetch('/get-light-control-status');
       const data = await response.json();
-      return data.isEnabled;
+      return data;
     } catch (error) {
-      console.error('Erreur lors de la récupération du statut de contrôle des lumières :', error);
-      return false; // Par défaut, le contrôle est désactivé en cas d'erreur de récupération
+      console.error('Error getting the status :', error);
+      return false; // by default, the control is deactivated in case of an error
     }
   }
   
-// Exemple d'utilisation
 (async () => {
-const lightControlEnabled = await getLightControlStatus();
-console.log('Statut du mode Home Theater :', lightControlEnabled);
-if (lightControlEnabled) {
+const data = await getLightControlStatus();
+console.log('Home Theater Mode enabled :', data.homeTheaterMode);
+if (data.homeTheaterMode) {
     document.querySelector("#lightControlCheckbox").setAttribute("checked", "")
 }
-// Utilisez la valeur de lightControlEnabled comme vous le souhaitez dans votre script
+if (data.debugMode) {
+    document.querySelector("#debugMode").setAttribute("checked", "")
+}
+document.querySelector("#playerName").setAttribute("value", data.playerName)
+document.querySelector("#userName1").setAttribute("value", data.userName1)
+document.querySelector("#userName2").setAttribute("value", data.userName2)
 })();
