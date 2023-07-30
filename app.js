@@ -5,6 +5,7 @@ const axios = require('axios');
 const multer = require('multer');
 const credentials = require('./credentials'); 
 const fs = require('fs');
+const path = require('path');
 
 const app = express();
 const port = 3000;
@@ -17,11 +18,21 @@ const upload = multer();
 //Vars for configs
 let playerName, userOneName, userTwoName, homeTheaterMode, lightNumber;
 
-// Charger les valeurs depuis le fichier JSON au démarrage de l'application
+// Vérifier si le dossier "logs" existe
+const logsDirectory = path.join(__dirname, 'logs');
+
+if (!fs.existsSync(logsDirectory)) {
+  // Si le dossier n'existe pas, le créer
+  fs.mkdirSync(logsDirectory);
+}
+
+
+//Log file path
+const logFilePath = path.join(__dirname, 'logs', `log_${getCurrentDate()}.txt`);
+
 const configPath = './config.json';
 let config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
 
-// Fonction pour charger les données depuis le fichier JSON
 function loadConfig() {
   try {
     const configFileContent = fs.readFileSync(configPath, 'utf8');
@@ -40,7 +51,7 @@ function loadConfig() {
   }
 }
 
-// Charger les données au démarrage de l'application
+// Load configs at startup
 loadConfig();
 
 app.post('/webhook', upload.any(), (req, res) => {
@@ -107,7 +118,7 @@ app.post('/toggle-debug', express.json(), (req, res) => {
   const { isEnabled } = req.body;
   debugMode = isEnabled;
   const message = isEnabled ? '✅ Debug mode activated.' : '❌ Debug mode deactivated.';
-  console.log(`${isEnabled ? '✅ Debug mode activated.' : '❌ Debug mode deactivated.'}`)
+  logMessage(`${isEnabled ? '✅ Debug mode activated.' : '❌ Debug mode deactivated.'}`, true)
   res.json({ message });
 });
 
@@ -145,11 +156,25 @@ async function controlHueLight(on) {
   }
 }
 
+function getCurrentDate() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+fs.writeFileSync(logFilePath, '', { flag: 'a' });
+
 // Custom logging function
 function logMessage(message, important = false) {
   if (debugMode || important) {
     console.log(message);
   }
+  // Enregistrement dans le fichier log
+  fs.writeFileSync(logFilePath, `${new Date().toISOString()} - ${message}\n`, {
+    flag: 'a'
+  });
 }
 
 app.listen(port, () => {
