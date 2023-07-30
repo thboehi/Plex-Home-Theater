@@ -1,6 +1,6 @@
 ![Logo](https://i.imgur.com/CmxxBLE.png)
 # Plex Home Theater
-
+> Version 1.0.1
 
 Plex Home Theater turns off your light as soon as you start a movie and turn on your lights as soon as you stop it.
 
