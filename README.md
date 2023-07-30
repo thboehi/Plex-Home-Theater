@@ -1,4 +1,4 @@
-![Logo](https://i.imgur.com/QLRJgEn.png)
+![Logo](https://i.imgur.com/CmxxBLE.png)
 # Plex Home Theater
 
 
