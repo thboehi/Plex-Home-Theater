@@ -105,3 +105,21 @@ h1{
 .toggle input:checked + label::before {
     transform: translateX(45px);
 }
+
+#consoleLog{
+    background-color: black;
+    padding: 20px;
+    height: 300px;
+    overflow-y: scroll;
+    transition: padding-top 300ms ease-in-out, padding-bottom 300ms ease-in-out, height 300ms ease-in-out;
+}
+
+#consoleLog[data-state="hidden"]{
+    padding-top: 0px;
+    padding-bottom: 0px;
+    height: 0px;
+}
+
+#consoleLog p{
+    font-size: 0.7rem;
+}
