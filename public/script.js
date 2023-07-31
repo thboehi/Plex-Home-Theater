@@ -36,13 +36,14 @@ async function updateData() {
     const playerName = document.getElementById('playerName').value;
     const userName1 = document.getElementById('userName1').value;
     const userName2 = document.getElementById('userName2').value;
+    const lightNumber = document.getElementById('lightNumber').value;
     try {
         const response = await fetch('/update-data', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ playerName: playerName, userOneName: userName1, userTwoName: userName2 })
+            body: JSON.stringify({ playerName: playerName, userOneName: userName1, userTwoName: userName2, lightNumber: lightNumber })
         });
         const data = await response.json();
         console.log(data.message);
@@ -76,4 +77,5 @@ if (data.debugMode) {
 document.querySelector("#playerName").setAttribute("value", data.playerName)
 document.querySelector("#userName1").setAttribute("value", data.userName1)
 document.querySelector("#userName2").setAttribute("value", data.userName2)
+document.querySelector("#lightNumber").setAttribute("value", data.lightNumber)
 })();

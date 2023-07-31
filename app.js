@@ -5,24 +5,34 @@ const axios = require('axios');
 const multer = require('multer');
 const credentials = require('./credentials'); 
 const fs = require('fs');
+const path = require('path');
 
 const app = express();
 const port = 3000;
 
 const baseHueURL = credentials.baseUrl; // Change this in the credentials.js file
 const username = credentials.username; // Change by your token for the Hue Bridge (search google how to create a new token, you can use Insomnia, Postman, etc.)
-const lightNumber = 4; // The number of the light you wish to control
 
 const upload = multer();
 
 //Vars for configs
-let playerName, userOneName, userTwoName, homeTheaterMode;
+let playerName, userOneName, userTwoName, homeTheaterMode, lightNumber;
 
-// Charger les valeurs depuis le fichier JSON au démarrage de l'application
+// Vérifier si le dossier "logs" existe
+const logsDirectory = path.join(__dirname, 'logs');
+
+if (!fs.existsSync(logsDirectory)) {
+  // Si le dossier n'existe pas, le créer
+  fs.mkdirSync(logsDirectory);
+}
+
+
+//Log file path
+const logFilePath = path.join(__dirname, 'logs', `log_${getCurrentDate()}.txt`);
+
 const configPath = './config.json';
 let config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
 
-// Fonction pour charger les données depuis le fichier JSON
 function loadConfig() {
   try {
     const configFileContent = fs.readFileSync(configPath, 'utf8');
@@ -32,6 +42,7 @@ function loadConfig() {
     userOneName = loadedConfig.userOneName;
     userTwoName = loadedConfig.userTwoName;
     homeTheaterMode = loadedConfig.homeTheaterMode;
+    lightNumber = loadedConfig.lightNumber;
     debugMode = loadedConfig.debugMode;
     logMessage('Configuration loaded from config.json.', true);
   } catch (error) {
@@ -40,7 +51,7 @@ function loadConfig() {
   }
 }
 
-// Charger les données au démarrage de l'application
+// Load configs at startup
 loadConfig();
 
 app.post('/webhook', upload.any(), (req, res) => {
@@ -93,7 +104,7 @@ app.use(express.static('public'));
 
 // Route to get current setup
 app.get('/get-light-control-status', (req, res) => {
-  res.json({ homeTheaterMode: homeTheaterMode, playerName: playerName, userName1: userOneName, userName2: userTwoName, debugMode: debugMode });
+  res.json({ homeTheaterMode: homeTheaterMode, playerName: playerName, userName1: userOneName, userName2: userTwoName, debugMode: debugMode, lightNumber: lightNumber });
 });
 
 app.post('/toggle-light-control', express.json(), (req, res) => {
@@ -107,7 +118,7 @@ app.post('/toggle-debug', express.json(), (req, res) => {
   const { isEnabled } = req.body;
   debugMode = isEnabled;
   const message = isEnabled ? '✅ Debug mode activated.' : '❌ Debug mode deactivated.';
-  console.log(`${isEnabled ? '✅ Debug mode activated.' : '❌ Debug mode deactivated.'}`)
+  logMessage(`${isEnabled ? '✅ Debug mode activated.' : '❌ Debug mode deactivated.'}`, true)
   res.json({ message });
 });
 
@@ -116,12 +127,14 @@ app.post('/update-data', express.json(), (req, res) => {
   playerName = updatedData.playerName
   userOneName = updatedData.userOneName
   userTwoName = updatedData.userTwoName
+  lightNumber = updatedData.lightNumber
   const message = "Informations changée vers: " . updatedData
 
     // Save the config to the config file
     config.playerName = updatedData.playerName;
     config.userOneName = updatedData.userOneName;
     config.userTwoName = updatedData.userTwoName;
+    config.lightNumber = updatedData.lightNumber;
     fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf8');
 
 
@@ -143,11 +156,25 @@ async function controlHueLight(on) {
   }
 }
 
+function getCurrentDate() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+fs.writeFileSync(logFilePath, '', { flag: 'a' });
+
 // Custom logging function
 function logMessage(message, important = false) {
   if (debugMode || important) {
     console.log(message);
   }
+  // Enregistrement dans le fichier log
+  fs.writeFileSync(logFilePath, `${new Date().toISOString()} - ${message}\n`, {
+    flag: 'a'
+  });
 }
 
 app.listen(port, () => {
