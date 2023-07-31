@@ -17,6 +17,11 @@ async function toggleLightControl() {
 
 async function toggleDebugMode() {
     const isChecked = document.getElementById('debugMode').checked;
+    if (isChecked){
+        document.getElementById("consoleLog").setAttribute("data-state", "visible")
+    } else {
+        document.getElementById("consoleLog").setAttribute("data-state", "hidden")
+    }
     try {
         const response = await fetch('/toggle-debug', {
             method: 'POST',
@@ -73,9 +78,24 @@ if (data.homeTheaterMode) {
 }
 if (data.debugMode) {
     document.querySelector("#debugMode").setAttribute("checked", "")
+    document.getElementById("consoleLog").setAttribute("data-state", "visible")
 }
 document.querySelector("#playerName").setAttribute("value", data.playerName)
 document.querySelector("#userName1").setAttribute("value", data.userName1)
 document.querySelector("#userName2").setAttribute("value", data.userName2)
 document.querySelector("#lightNumber").setAttribute("value", data.lightNumber)
 })();
+
+// Créez une connexion WebSocket côté client
+const socket = new WebSocket('ws://bear.local:3001');
+
+// Écoutez les messages WebSocket reçus et ajoutez-les à l'élément consoleLog
+socket.addEventListener('message', (event) => {
+    const consoleLog = document.getElementById('consoleLog');
+    const newLogLine = document.createElement('p');
+    newLogLine.textContent = event.data;
+    consoleLog.appendChild(newLogLine);
+
+    // Faites défiler automatiquement la div vers le bas à mesure que de nouvelles lignes sont ajoutées
+    consoleLog.scrollTop = consoleLog.scrollHeight;
+});
