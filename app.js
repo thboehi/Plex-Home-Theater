@@ -6,6 +6,8 @@ const multer = require('multer');
 const credentials = require('./credentials'); 
 const fs = require('fs');
 const path = require('path');
+const WebSocket = require('ws');
+const wss = new WebSocket.Server({ port: 3001 });
 
 const app = express();
 const port = 3000;
@@ -22,7 +24,7 @@ let playerName, userOneName, userTwoName, homeTheaterMode, lightNumber;
 const logsDirectory = path.join(__dirname, 'logs');
 
 if (!fs.existsSync(logsDirectory)) {
-  // Si le dossier n'existe pas, le créer
+  // If folder do not exists, create one
   fs.mkdirSync(logsDirectory);
 }
 
@@ -175,6 +177,13 @@ function logMessage(message, important = false) {
   fs.writeFileSync(logFilePath, `${new Date().toISOString()} - ${message}\n`, {
     flag: 'a'
   });
+
+    // Envoi du message à tous les clients WebSocket connectés
+    wss.clients.forEach((client) => {
+        if (client.readyState === WebSocket.OPEN) {
+            client.send(message);
+        }
+    });
 }
 
 app.listen(port, () => {
