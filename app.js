@@ -113,6 +113,7 @@ app.post('/toggle-light-control', express.json(), (req, res) => {
     const { isEnabled } = req.body;
     homeTheaterMode = isEnabled;
     const message = isEnabled ? '✅ Home Theater Mode activated.' : '❌ Home Theater Mode deactivated.';
+    logMessage(message)
     res.json({ message });
 });
 
