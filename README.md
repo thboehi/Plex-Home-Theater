@@ -12,7 +12,7 @@ You can install the project using git clone and the follow these steps
 
 
 1. [Get a token/username from your Hue Bridge](https://www.sitebase.be/generate-phillips-hue-api-token/)
-2. Go to credentials_example.js and edit it with your Bridge Ip and token/username
+2. Go to credentials_example.js and edit it with your Bridge Ip and token/username. After that, rename the file to credentials.js
 3. Run `npm install` on the root to download node modules
 4. Run `node app.js` to start the server or `pm2 start app.js` if you use PM2 (recommended)
 5.  Go to [app.plex.tv/webhook](https://app.plex.tv/desktop/#!/settings/webhooks) and add a webhook to your machine, for example (if on the same machine) `http://localhost:3000/webhook`
