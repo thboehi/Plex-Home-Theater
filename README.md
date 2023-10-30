@@ -25,7 +25,8 @@ _**Player Name**_ will be the name of your TV. If you don't know it, just activa
 
 **_Users_** The actions will be performed if the user is one of the two that are configured. Like for the player, just try with debug mode to see your username. If you live alone, just leave the second user empty or put your username twice.
 
-**_Light number_** will be the ID number of your Philips Hue light. For the moment, only one can be controlled.
+**_Light number_** will be the ID number of your Philips Hue light. For the moment, only one can be controlled. To find the number of your light, just go to `http://<bridge_ip_address>/api/<username>/lights` and all your lights will be listed.
+Username = token
 
 **_Debug mode_** will turn on console logs and in the web interface, a console will be shown.
 
