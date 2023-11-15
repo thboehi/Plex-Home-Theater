@@ -10,7 +10,7 @@ const WebSocket = require('ws');
 const wss = new WebSocket.Server({ port: 3001 });
 
 const app = express();
-const port = 3000;
+const port = 80;
 
 const baseHueURL = credentials.baseUrl; // Change this in the credentials.js file
 const username = credentials.username; // Change by your token for the Hue Bridge (search google how to create a new token, you can use Insomnia, Postman, etc.)
@@ -18,7 +18,7 @@ const username = credentials.username; // Change by your token for the Hue Bridg
 const upload = multer();
 
 //Vars for configs
-let playerName, userOneName, userTwoName, homeTheaterMode, lightNumber;
+let playerName, userOneName, userTwoName, homeTheaterMode, lightNumber, notBefore, notAfter;
 
 // Vérifier si le dossier "logs" existe
 const logsDirectory = path.join(__dirname, 'logs');
@@ -46,6 +46,8 @@ function loadConfig() {
     homeTheaterMode = loadedConfig.homeTheaterMode;
     lightNumber = loadedConfig.lightNumber;
     debugMode = loadedConfig.debugMode;
+    notBefore = loadedConfig.notBefore;
+    notAfter = loadedConfig.notAfter
     logMessage('Configuration loaded from config.json.', true);
   } catch (error) {
     logMessage('Error loading configuration from config.json:', true);
@@ -57,6 +59,7 @@ function loadConfig() {
 loadConfig();
 
 app.post('/webhook', upload.any(), (req, res) => {
+  if (isItTime()) {
     const reqBody = JSON.parse(req.body.payload);
     const player = reqBody.Player.title;
     logMessage("------------------");
@@ -97,6 +100,16 @@ app.post('/webhook', upload.any(), (req, res) => {
         logMessage("Not the right environment, noting to do more.")
         logMessage("------------------");
     }
+  } else {
+    if (notAfter === "" || notBefore === "") {
+      logMessage("------------------");
+      logMessage('Time activation has not been defined now, please define it before using this app.');
+    } else {
+      logMessage("------------------");
+      logMessage('Not right now\nOnly between ' + notBefore + ' and ' + notAfter);
+    }
+  }
+    
 
     res.sendStatus(200);
 });
@@ -106,7 +119,7 @@ app.use(express.static('public'));
 
 // Route to get current setup
 app.get('/get-light-control-status', (req, res) => {
-  res.json({ homeTheaterMode: homeTheaterMode, playerName: playerName, userName1: userOneName, userName2: userTwoName, debugMode: debugMode, lightNumber: lightNumber });
+  res.json({ homeTheaterMode: homeTheaterMode, playerName: playerName, userName1: userOneName, userName2: userTwoName, debugMode: debugMode, lightNumber: lightNumber, notBefore: notBefore, notAfter: notAfter });
 });
 
 app.post('/toggle-light-control', express.json(), (req, res) => {
@@ -131,6 +144,8 @@ app.post('/update-data', express.json(), (req, res) => {
   userOneName = updatedData.userOneName
   userTwoName = updatedData.userTwoName
   lightNumber = updatedData.lightNumber
+  notBefore = updatedData.notBefore
+  notAfter = updatedData.notAfter
   const message = "Informations changée vers: " . updatedData
 
     // Save the config to the config file
@@ -138,6 +153,8 @@ app.post('/update-data', express.json(), (req, res) => {
     config.userOneName = updatedData.userOneName;
     config.userTwoName = updatedData.userTwoName;
     config.lightNumber = updatedData.lightNumber;
+    config.notBefore = updatedData.notBefore
+    config.notAfter = updatedData.notAfter
     fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf8');
 
 
@@ -155,7 +172,7 @@ async function controlHueLight(on) {
     await axios.put(url, body);
     logMessage(`The light ${lightNumber} is now ${on ? 'ON' : 'OFF'}.`);
   } catch (error) {
-    console.error('Error with Hue communication :', error.message);
+    console.error('Error with Hue communication :\n', error.message);
   }
 }
 
@@ -166,6 +183,31 @@ function getCurrentDate() {
   const day = String(now.getDate()).padStart(2, '0');
   return `${year}-${month}-${day}`;
 }
+
+const isItTime = () => {
+  // Obtenez l'heure actuelle
+  const now = new Date();
+  const currentHour = now.getHours();
+  const currentMinutes = now.getMinutes();
+
+  // Convertir les heures notBefore et notAfter en heures numériques
+  const [notBeforeHour, notBeforeMinutes] = notBefore.split(':').map(Number);
+  const [notAfterHour, notAfterMinutes] = notAfter.split(':').map(Number);
+
+  // Gestion du passage à minuit (notAfter < notBefore)
+  let isTimeInRange;
+  if (notAfterHour < notBeforeHour) {
+      isTimeInRange =
+          (currentHour > notBeforeHour || (currentHour === notBeforeHour && currentMinutes >= notBeforeMinutes)) ||
+          (currentHour < notAfterHour || (currentHour === notAfterHour && currentMinutes < notAfterMinutes));
+  } else {
+      isTimeInRange =
+          (currentHour > notBeforeHour || (currentHour === notBeforeHour && currentMinutes >= notBeforeMinutes)) &&
+          (currentHour < notAfterHour || (currentHour === notAfterHour && currentMinutes < notAfterMinutes));
+  }
+
+  return isTimeInRange;
+};
 
 fs.writeFileSync(logFilePath, '', { flag: 'a' });
 

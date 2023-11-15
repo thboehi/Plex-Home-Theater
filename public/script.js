@@ -37,18 +37,21 @@ async function toggleDebugMode() {
     }
 }
 
+
 async function updateData() {
     const playerName = document.getElementById('playerName').value;
     const userName1 = document.getElementById('userName1').value;
     const userName2 = document.getElementById('userName2').value;
     const lightNumber = document.getElementById('lightNumber').value;
+    const notBefore = document.getElementById('notBefore').value;
+    const notAfter = document.getElementById('notAfter').value;
     try {
         const response = await fetch('/update-data', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ playerName: playerName, userOneName: userName1, userTwoName: userName2, lightNumber: lightNumber })
+            body: JSON.stringify({ playerName: playerName, userOneName: userName1, userTwoName: userName2, lightNumber: lightNumber, notBefore: notBefore, notAfter: notAfter })
         });
         const data = await response.json();
         console.log(data.message);
@@ -84,10 +87,16 @@ document.querySelector("#playerName").setAttribute("value", data.playerName)
 document.querySelector("#userName1").setAttribute("value", data.userName1)
 document.querySelector("#userName2").setAttribute("value", data.userName2)
 document.querySelector("#lightNumber").setAttribute("value", data.lightNumber)
+console.log(data.notBefore);
+console.log(data.notAfter);
+document.querySelector("#notBefore").setAttribute("value", data.notBefore)
+document.querySelector("#notAfter").setAttribute("value", data.notAfter)
 })();
 
 // Créez une connexion WebSocket côté client
-const socket = new WebSocket('ws://bear.local:3001');
+const socket = new WebSocket('ws://' + window.location.hostname + ':3001');
+
+console.log
 
 // Écoutez les messages WebSocket reçus et ajoutez-les à l'élément consoleLog
 socket.addEventListener('message', (event) => {

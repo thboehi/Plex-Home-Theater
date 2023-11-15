@@ -56,6 +56,27 @@ h1{
     user-select: none; /* CSS pour Chrome et Firefox */
 }
 
+.control-container-hour {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 50px;
+}
+
+.control-container-hour input {
+    background-color: unset;
+    border: none;
+    border-bottom: #f2f4f3 solid;
+    outline: none;
+    color: #f2f4f3;
+}
+
+.control-container-hour input[type="time"]::-webkit-calendar-picker-indicator {
+    filter: invert(100%);
+}
+
 /* Styles de base pour le bouton de type activé/désactivé */
 .toggle {
     display: inline-block;

@@ -1,6 +1,6 @@
 ![Logo](https://i.imgur.com/CmxxBLE.png)
 # Plex Home Theater
-> Version 1.0.3
+> Version 1.1.2
 
 Plex Home Theater turns off your light as soon as you start a movie and turn on your lights as soon as you stop it.
 
@@ -15,9 +15,9 @@ You can install the project using git clone and the follow these steps
 2. Go to credentials_example.js and edit it with your Bridge Ip and token/username. After that, rename the file to credentials.js
 3. Run `npm install` on the root to download node modules
 4. Run `node app.js` to start the server or `pm2 start app.js` if you use PM2 (recommended)
-5.  Go to [app.plex.tv/webhook](https://app.plex.tv/desktop/#!/settings/webhooks) and add a webhook to your machine, for example (if on the same machine) `http://localhost:3000/webhook`
+5.  Go to [app.plex.tv/webhook](https://app.plex.tv/desktop/#!/settings/webhooks) and add a webhook to your machine, for example (if on the same machine) `http://localhost/webhook`
 
-You can go to [yourmachineip:3000](http://localhost:3000) with your web browser to edit the configs or directly from config.json (needs a restart if changed from file)
+You can go to [yourmachineip:80](http://localhost:80) with your web browser to edit the configs or directly from config.json (needs a restart if changed from file)
 
 ## Configs
 
@@ -47,3 +47,9 @@ See the list of changes that have been made to the project
 
 ### [1.0.1] 30.07.2023
  - Added logs file to keep track
+
+### [1.1.0] 10.11.2023
+- Added time to prevent the app being active in the afternoon for example.
+
+### [1.1.2] 15.11.2023
+- Final version (yes i skipped 1.1.1)
